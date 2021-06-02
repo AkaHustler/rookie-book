@@ -1,0 +1,15 @@
+{
+    "title":"Rookie Book",
+    "author":"houzhongbo",
+    "description":"rookie book",
+    "language":"zh-hans",
+    "plugins":[
+        "-search",
+        "back-to-top-button",
+        "expandable-chapters-small",
+        "chapter-fold",
+        "code",
+        "advanced-emoji",
+        "splitter"
+    ]
+}
