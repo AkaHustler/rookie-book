@@ -6,7 +6,7 @@
 >
 > [学习算法和刷题的思路指南 :: labuladong的算法小抄 (gitee.io)](https://labuladong.gitee.io/algo/1/2/)
 
-* [第一章：必读文章](chapter1.md)
-* [第二章：数据结构](chapter2.md)
+* [第一章：前言](chapter1.md)
+* [第二章：手把手刷数据结构](chapter2.md)
 * [第三章：动态规划](chapter3.md)
 
