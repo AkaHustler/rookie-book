@@ -33,9 +33,9 @@ FastCGI是web服务器(如Nginx、Apache)和处理程序的一种通信协议，
 
 - ##### 基本实现
 
-**fpm**的实现就是创建一个master进程，在master进程中 **创建并监听socket**，然后fork出多个子进程，这些子进程各自accept请求，子进程的处很简单，在启动后 **阻塞** 在accept上，有请求后开始读取请求数据，读取完成后开始处理然后再返回，期间是不会处理其他请求的，即 **fpm的子进程同时只能响应一个请求**，只有把这个请求处理完成才会accept下一个请求。而nginx的子进程通过epoll处理套接字，如果一个请求数据还未发送完成则会处理下一个请求，即 **一个进程同时连接多个请求，是非阻塞的模型，只处理活活跃的套接字**。
+**fpm**的实现就是创建一个master进程，在master进程中 **创建并监听socket**，然后fork出多个子进程，这些子进程各自accept请求，子进程的处理很简单，在启动后 **阻塞** 在accept上，有请求后开始读取请求数据，读取完成后开始处理然后再返回，期间是不会处理其他请求的，即 **fpm的子进程同时只能响应一个请求**，只有把这个请求处理完成才会accept下一个请求。而nginx的子进程通过epoll处理套接字，如果一个请求数据还未发送完成则会处理下一个请求，即 **一个进程同时连接多个请求，是非阻塞的模型，只处理活跃的套接字**。
 
-fpm的master进程和worker进程不回直接进行通信，**master通过共享内存获取worker进程的信息，比如worker进程当前状态、已处理请求数等**，当master要杀掉一个worker进程时则通过发送信号的方式通知worker进程。
+fpm的master进程和worker进程不会直接进行通信，**master通过共享内存获取worker进程的信息，比如worker进程当前状态、已处理请求数等**，当master要杀掉一个worker进程时则通过发送信号的方式通知worker进程。
 
 fpm可以监听多个端口，每个端口对应一个**worker pool**，而每个pool下对应多个worker进程，类似nginx的server概念。
 
@@ -91,3 +91,129 @@ master管理worker进程的三种不同方式
 **dynamic**：动态进程管理，启动时master按照 **pm.start_servers** 初始化一定数量worker，运行中master发现空闲worker数低于 **pm.min_spare_servers** 配置数(表示请求数比较多，worker处理不过来)则会fork worker进程，但总的worker数不能超过 **pm.max_children**，如果master发现空闲worker数多于 **pm.max_spare_servers**(表示闲着的worker过多)则会杀掉一些worker
 
 **ondemand**：此方式很少用，在启动时不分配worker进程，等到有请求了后再通知master进程fork worker进程，总的worker进程不超过 **pm.max_children**，处理完后worker进程不会立即退出，当空闲时间超过 **pm.process_idle_timeout**后再退出。
+
+- PHP执行的几个阶段
+
+1. 模块初始化阶段
+2. 请求初始化阶段
+3. 执行php脚本阶段
+4. 请求结束阶段
+5. 模块关闭阶段
+
+### 变量
+
+#### 变量内部实现
+
+- 变量内部实现
+
+变量有两个组成部分：变量名、变量值，php中将其对应为：**zval，zend_value**，php中的 **变量的内存** 是通过 **引用计数** 进行管理的，而且php7中 **引用计数**是在zend_value而不是在zval上，变量之间的传递、赋值通常是针对zend_value。
+
+1. 变量的基础结构
+
+``` c
+//zend_types.h
+typedef struct _zval_struct zval;
+typedef union _zend_value {
+zend_long lval; //int整形
+double dval; //浮点型
+zend_refcounted *counted;
+zend_string *str; //string字符串
+zend_array *arr; //array数组
+zend_object *obj; //object对象
+zend_resource *res; //resource资源类型
+zend_reference *ref; //引用类型，通过&$var_name定义的
+zend_ast_ref *ast; //下面几个都是内核使用的value
+zval *zv;
+void *ptr;
+zend_class_entry *ce;
+zend_function *func;
+struct {
+uint32_t w1;
+uint32_t w2;
+} ww;
+} zend_value;
+```
+
+``` c
+struct _zval_struct {
+zend_value value; //变量实际的value
+  union {
+  	struct {
+  	ZEND_ENDIAN_LOHI_4( //这个是为了兼容大小字节序，小字节序就是下面的顺序，大字节序则下面4个顺序翻转
+  zend_uchar type, //变量类型
+  zend_uchar type_flags, //类型掩码，不同的类型会有不同的几种属性，内存管理会用到
+  zend_uchar const_flags,
+  zend_uchar reserved) //call info，zend执行流程会用到
+  } v;
+  uint32_t type_info; //上面4个值的组合值，可以直接根据type_info取到4个对应位置的值
+  } u1;
+  union {
+  uint32_t var_flags;
+  uint32_t next; //哈希表中解决哈希冲突时用到
+  uint32_t cache_slot; /* literal cache slot */
+  uint32_t lineno; /* line number (for ast nodes)
+  */
+  uint32_t num_args; /* arguments number for EX(Thi
+  s) */
+  uint32_t fe_pos; /* foreach position */
+  uint32_t fe_iter_idx; /* foreach iterator index */
+  } u2; //一些辅助值
+};
+```
+
+**zval** 结构比较简单，内嵌一个 union类型的zend_value，保存具体变量类型的值或指针，还有两个union：u1，u2
+
+u1：变量的类型就通过 **u1.v.type** 区分，另一个值 **type_flags** 为类型掩码，在变量的内存管理、gc中会用到
+
+u2：辅助值
+
+从 **zend_value**可以看出，除了 **long、double**类型直接存储值外，其他类型存储的都是指针，指向各自的结构。
+
+2. 类型
+
+标量类型：最简单的类型是 **true、false、long、double、null**，其中true、false、null没有value，直接根据type区分，而long、double的值直接存在value中；zend_long、double，也就是标量类型不需要额外的value指针
+
+字符串：PHP中字符串通过 **zend_string**表示：
+
+``` c
+struct _zend_string {
+	zend_refcounted_h gc;
+	zend_ulong h; /* hash value */
+	size_t len;
+	char val[1];
+};
+```
+
+1. gc：变量引用信息，比如当前value的引用数，所有用到 **引用计数** 的变量类型都会有这个结构
+2. h：哈希值，数组中计算索引时会用到
+3. len：字符串长度，通过该值保证二进制安全
+4. val：字符串内容，变长struct，分配时按len长度申请内存
+
+字符串还可分为具体的几类，通过flaf保存：zval.value->gc.u.flags
+
+数组：数组的底层实现就是普通的有序HashTable
+
+对象/资源：对象比较常见。资源指的是tcp连接、文件句柄等，这种类型可以随便定义struct，通过ptr指向
+
+引用：引用实际是指向另外一个PHP变量，对它的修改会直接改动实际指向的zval，通过 **&** 操作符产生一个引用变量，**&** 首先会创建一个 **zend_reference** 结构，内嵌了一个zval，这个zval的value指向 原来zval的value（如果是 **布尔、整形、浮点**则直接复制原来的值），然后将原来zval的类型修改为 **IS_REFERENC**，原zval的value指向新创建的 **zend_reference** 结构。
+
+``` c
+struct _zend_reference {
+	zend_refcounted_h gc;
+	zval val;
+};
+```
+
+PHP中的引用只可能有一层，不会出现一个引用指向另外一个引用的情况，就是没有C语言中**指针的指针** 的概念
+
+3. 内存管理
+
+如果使用硬拷贝方式，赋值、函数传参硬拷贝一个副本。最终各变量
+
+#### 数组
+
+#### 静态变量
+
+#### 全局变量
+
+#### 常量
