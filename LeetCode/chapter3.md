@@ -54,9 +54,19 @@ ListNode reverseN (ListNode head, int n)
 ```
 
 ``` java
+private ListNode precursorNode;
 //将链表的前N个节点反转
-ListNode reverseN (ListNode head, int n) {
-  
+ListNode reverseN (ListNode head, int n) 
+{
+  //base case
+  if (n == 1) {
+    precursorNode = head->next;
+    return head;
+  }
+  ListNode last = reverseN(head.next);
+  head->next->next = head;
+  head->next = precursorNode;
+  return last;
 }
 ```
 
