@@ -36,6 +36,34 @@ ListNode reverse(ListNode head) {
 
 递归的思想就是 **明确递归函数的定义**，reverse函数的定义就是 **输入一个节点head，将以「head为起点」的链表反转，并返回反转之后的头接点**。
 
+有几个地方需要注意下：
+
+要有base case，意思是只有一个节点的时候反转是它是自己；当链表反转之后，新的头节点是last，原来的head节点变成最后一个节点，末尾的节点要指向null
+
+``` java
+head->next = null;
+```
+
+- 反转列表前N个节点
+
+定义递归函数，
+
+``` java
+//将链表的前N个节点反转
+ListNode reverseN (ListNode head, int n)
+```
+
+``` java
+//将链表的前N个节点反转
+ListNode reverseN (ListNode head, int n) {
+  
+}
+```
+
+
+
+- 反转链表的一部分
+
 #### 如何k个一组反转链表
 
 #### 如何判断回文链表
