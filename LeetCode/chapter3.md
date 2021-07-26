@@ -74,6 +74,27 @@ ListNode reverseN (ListNode head, int n)
 
 - 反转链表的一部分
 
+定义递归函数
+
+``` java
+//给一个索引区间[m,n]，仅反转区间中的链表元素
+ListNode reverseBetween(ListNode head, int m, int n)
+```
+
+如果m = 1，就相当于反转列表前n个节点，如果不等于1，将head的索引视为1，是从第m个节点开始反转，对于head->next来说，就是从第m-1个节点开始反转
+
+```java
+ListNode reverseBetween(ListNode head, int m, int n) {
+  if (m == 1) {
+    return reverseN(head, n);
+  }
+  $head->next = reverseBetween(head->next, m - 1, n - 1);
+  return head;
+}
+```
+
+值得一提的是，**递归操作列表并不是高效的**，虽然时间复杂度都是O(n)，但是迭代解法的空间复杂度是O(1)，而递归解法需要堆栈，空间复杂度是O(n)，主要是理解递归思想。
+
 #### 如何k个一组反转链表
 
 #### 如何判断回文链表
