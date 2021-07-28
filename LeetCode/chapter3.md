@@ -124,7 +124,77 @@ k个节点为1组反转链表，子问题与原问题的结构完全相同，就
 
 base case就是最后的元素如果不足 **k**个，就保持不变。
 
+``` java
+ListNode reverseKGroup(ListNode head, int k) {
+    if (head == null) return null;
+    // 区间 [a, b) 包含 k 个待反转元素
+    ListNode a, b;
+    a = b = head;
+    for (int i = 0; i < k; i++) {
+        // 不足 k 个，不需要反转，base case
+        if (b == null) return head;
+        b = b.next;
+    }
+    // 反转前 k 个元素
+    ListNode newHead = reverse(a, b);
+    // 递归反转后续链表并连接起来
+    a.next = reverseKGroup(b, k);
+    return newHead;
+}
+```
+
+reverse函数是反转[a,b)区间的节点，reverseKGroup函数是每k个节点反转为一组反转以head为头节点的链表
+
+reverseKGroup是每k个节点反转，所以需要将 **a.next = reverseKGroup(head, k)** 链接起来
+
 #### 如何判断回文链表
 
+- 最长回文子串
 
+**回文串就是正着读反着读都一样的字符串**
 
+解决该类问题的核心是 **双指针**
+
+给定一个字符串s，找到s中最长的回文子串
+
+> 示例1:
+>
+> 输入："babad"
+>
+> 输出："bab"
+>
+> 注意："aba"也是一个有效答案
+
+> 示例2:
+>
+> 输入："cbbd"
+>
+> 输出："bb"
+
+``` java
+string longestPalindrome(string s) {}
+```
+
+解题思路：
+
+**寻找回文串的核心思想是：从中间开始向两边扩散来判断回文串**
+
+从中间向两边扩散：
+
+> for 0 <= i <= len(s)
+>
+> ​	找到以 **s[i]** 为中心的回文串
+>
+> ​	更新答案
+
+但是字符串的长度可能是奇数或偶数，所以改下
+
+> for 0 <= i <= len(s)
+>
+> ​	找到以 **s[i]** 为中心的回文串
+>
+> ​	找到以 **s[i]** 和 **s[i+1]** 为中心的回文串
+>
+> ​	更新答案
+
+还有一些细节问题索引越界等问题，代码中解决
