@@ -8,5 +8,6 @@
 
 * [第一章：前言](chapter1.md)
 * [第二章：手把手刷数据结构](chapter2.md)
-* [第三章：小白入门计划](chapter3.md)
+* [第三章：手把手刷动态规划](chapter3.md)
+* [第四章：小白入门计划](chapter4.md)
 

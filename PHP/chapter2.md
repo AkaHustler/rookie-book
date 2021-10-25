@@ -112,7 +112,7 @@ PHP中的引用只可能有一层，不会出现一个引用指向另外一个�
 
 但从**zend_value**的结构可以看出，并不是所有数据类型都会用到引用计数，**long、double** 直接都是硬拷贝，只有value是 **指针**那几种类型才可能会用到引用计数。
 
-并不是所有的php比变量都会用到引用计数，标量：true/false/double/long/null是硬拷贝自然不需要，除此之外还有两个特殊类型也不会用到：interned string(内部字符串，即上文提到的IS_STR_INTERNED、immutable array)，通过**zval.u1.type_flag** 类型掩码来区分是否支持饮用计数
+并不是所有的php比变量都会用到引用计数，标量：true/false/double/long/null是硬拷贝自然不需要，除此之外还有两个特殊类型也不会用到：interned string(内部字符串，即上文提到的IS_STR_INTERNED、immutable array)，通过**zval.u1.type_flag** 类型掩码来区分是否支持引用计数
 
 - **interned string**：内部字符串
 - **immutable array**：只有在用opcache的时候才会用到这种类型

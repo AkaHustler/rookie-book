@@ -109,8 +109,6 @@ TreeNode invertTree(TreeNode root) {
 
 [116. 填充每个节点的下一个右侧节点指针 - 力扣（LeetCode） (leetcode-cn.com)](https://leetcode-cn.com/problems/populating-next-right-pointers-in-each-node/)
 
-![](https://labuladong.gitee.io/algo/images/%e4%ba%8c%e5%8f%89%e6%a0%91%e7%b3%bb%e5%88%97/1.png)
-
 就是将二叉树每层的节点用next指针连起来，题目为完美二叉树，即除了最右侧的节点指针 **next** 会指向null，其他节点一定有相邻的节点
 
 **递归算法思路：不要考虑太细化，需要考虑的是每个节点应该做的事，确定函数作用与含义，递归处理子节点时就会将完成要求**
@@ -167,7 +165,7 @@ class Solution {
 [105. 从前序与中序遍历序列构造二叉树 - 力扣（LeetCode） (leetcode-cn.com)](https://leetcode-cn.com/problems/construct-binary-tree-from-preorder-and-inorder-traversal/)
 
 **Input**: preorder = [3,9,20,15,7], inorder = [9,3,15,20,7]
-**Output**: [3,9,20,null,null,15,7]
+      **Output**: [3,9,20,null,null,15,7]
 
 ![](https://assets.leetcode.com/uploads/2021/02/19/tree.jpg)
 
