@@ -10,19 +10,17 @@
 
 先构造分界点，然后再去左右子数组构造分界点，即二叉树的前序遍历逻辑
 
-``` java
+```java
  void sort(int[] nums, int lo, int hi) {
    /******  前序遍历位置 ******/
    // 通过交换元素构建分界点 p
    int p = partition(nums, lo, hi);
    /**************************/
-   
+
    sort(nums, lo, p - 1);
    sort(nums, p + 1, hi)
  }
 ```
-
-
 
 - 归并排序
 
@@ -30,12 +28,12 @@
 
 先对左右子数组排序，然后合并，即二叉树的后序遍历处理，还包括了分治算法
 
-``` java
+```java
 void sort(int[] nums, int lo, int hi) {
   int mid = (lo + hi) / 2;
   sort(nums, lo, mid);
   sort(nums, mid + 1, hi);
-  
+
   /****** 后序遍历位置 ******/
   //合并两个排好序的子数组
   merge(nums, lo, mid, hi);
@@ -47,7 +45,7 @@ void sort(int[] nums, int lo, int hi) {
 
 举个例子：计算一颗二叉树共有几个节点
 
-``` java
+```java
 // 定义：count(root) 返回以 root 为根的树有多少节点
 int count(TreeNode root) {
   //base case
@@ -67,7 +65,7 @@ int count(TreeNode root) {
 
 输入一个二叉树跟节点 **root**，把整棵树镜像翻转，比如输入二叉树如下：
 
-``` java
+```java
      4
    /   \
   2     7
@@ -77,7 +75,7 @@ int count(TreeNode root) {
 
 算法原地翻转二叉树，使得以 **root**为根的树变成：
 
-``` java
+```java
      4
    /   \
   7     2
@@ -87,7 +85,7 @@ int count(TreeNode root) {
 
 **只要我们把二叉树上的每个节点的左右子节点进行交换，我们得到的就是完全翻转后的二叉树**
 
-``` java
+```java
 //将整棵树的节点翻转
 TreeNode invertTree(TreeNode root) {
   //base case
@@ -132,7 +130,7 @@ TreeNode invertTree(TreeNode root) {
 ```php
 class Solution {
   public $tempNode;
-  
+
   function flatten($root) {
     //base case
     if ($root == null) {
@@ -176,14 +174,13 @@ class Solution {
 [652. 寻找重复的子树 - 力扣（LeetCode） (leetcode-cn.com)](https://leetcode-cn.com/problems/find-duplicate-subtrees/)
 
 ```php
-		 1
+         1
        / \
       2   3
      /   / \
     4   2   4
        /
       4
-
 ```
 
 下面是重复的子树：
@@ -205,8 +202,6 @@ class Solution {
 **后序遍历获取节点的左子树与右子树**
 
 将 **root节点** 的子树表示出来存放到hashmap中，从而得到重复子树
-
-
 
 ### 手把手刷二叉搜索树
 
@@ -263,7 +258,7 @@ void traverse(TreeNode root) {
 
 我们将遍历顺序颠倒下，即
 
-``` java
+```java
 void traverse(TreeNode root) {
     if (root == null) return;
     // 先递归遍历右子树
@@ -277,7 +272,4 @@ void traverse(TreeNode root) {
 
 得到的是降序的遍历结果，这样我们就可以将 **root**节点操作累加的和作为 **root**的新值，因为此时的累加和是比root节点大的所有节点累加的和，嘻嘻嘻
 
-
-
 ### 手把手刷链表题目
-
